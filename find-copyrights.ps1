@@ -103,7 +103,7 @@ Select-String -Pattern "^(?!.*$company).*copyright.*$" -List |
        Else ` 
         {"$(Get-Author $_.Path)", `
         "$(Get-Item $_.Path | Resolve-Path -Relative);", `
-        $(Get-MatchingLine $_)  })"} |
+        $(Get-MatchingLine $_.Matches.Value)  })"} |
 Emit-Output
 
 
