@@ -58,7 +58,6 @@ Function Emit-Output  {
 }
 
 
-
 #
 # Fix git log -1
 # 
@@ -68,7 +67,7 @@ Function Get-Author  {
            [string]$filePath)
     Process  {
         # git -1 doesn't do what you would expect.  It returns the last line printed not the first.
-        return &git log -2 --format="%cd; %ce" --reverse (Get-Item $filePath | Resolve-Path -Relative) | Select-Object -first 1
+        return &git log -2 --format="%cd; %ce;" --reverse (Get-Item $filePath | Resolve-Path -Relative) | Select-Object -first 1
     }
 }
 
@@ -91,6 +90,7 @@ Function Get-MatchingLine  {
         return $retVal.Replace(';','')
     }
 }
+
 
 #
 # Main: Admittedly a gnarly chain, but I was fooling around trying to see if I could do it in oneline from the prompt ;)
