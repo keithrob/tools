@@ -43,20 +43,54 @@ Param(
 Function Emit-Output  {
     [cmdletbinding()]
     Param ([parameter(ValueFromPipeline)]
-           [string]$pattern)
+           [string]$line)
     Process  {
-        if ($_.Trim()){
+        if ($line.Trim()){
             if ($outfile) {
-                $_ | Out-File -filepath $outfile -Append
+                $line | Out-File -filepath $outfile -Append
             } 
             Else {
-                Write-Host $_
+                Write-Host $line
             } 
         }
     }
 
 }
 
+
+
+#
+# Fix git log -1
+# 
+Function Get-Author  {
+    [cmdletbinding()]
+    Param ([parameter(ValueFromPipeline)]
+           [string]$filePath)
+    Process  {
+        # git -1 doesn't do what you would expect.  It returns the last line printed not the first.
+        return &git log -2 --format="%cd; %ce" --reverse (Get-Item $filePath | Resolve-Path -Relative) | Select-Object -first 1
+    }
+}
+
+
+#
+# Get the matching line from the file.
+# 
+Function Get-MatchingLine  {
+    [cmdletbinding()]
+    Param ([parameter(ValueFromPipeline)]
+           [string]$line)
+    Process  {
+        [string]$retVal = ""
+        if ($line.length -gt 80) {
+            $retVal = $line.substring(0,80)
+        }else {
+            $retVal = $line.substring(0,$line.length)
+        } 
+        # Remove semicolons since that is our CSV delimiter
+        return $retVal.Replace(';','')
+    }
+}
 
 #
 # Main: Admittedly a gnarly chain, but I was fooling around trying to see if I could do it in oneline from the prompt ;)
@@ -67,12 +101,9 @@ Select-String -Pattern "^(?!.*$company).*copyright.*$" -List |
     "$(If (&git check-ignore (Get-Item $_.Path | Resolve-Path -Relative)) `
         { Write-verbose "Ignored: $(Get-Item $_.Path | Resolve-Path -Relative)"} ` 
        Else ` 
-        {"$(&git log -1 --format="%cI; %ce;" --reverse (Get-Item $_.Path | Resolve-Path -Relative))", `
+        {"$(Get-Author $_.Path)", `
         "$(Get-Item $_.Path | Resolve-Path -Relative);", `
-        $(If ($_.Matches.Value.length -gt 80) `
-           {$_.Matches.Value.substring(0,80)} 
-          Else `
-           {$_.Matches.Value.substring(0,$_.Matches.Value.length)})  }) "} |
+        $(Get-MatchingLine $_)  })"} |
 Emit-Output
 
 
