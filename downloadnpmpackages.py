@@ -33,19 +33,19 @@ def get_versions(pkg):
     return []
 
 
-def get_package(pkg, versions):
+def get_package(pkg, versions, cachedir):
     """
         Kwargs:
-            package: The npm package to publish.
+            package: The npm package to fetch.
             registry: The registry to publish to.
     """
     for version in versions:
-        cmd = "npm --cache ./mycachedir --ignore-scripts install %s@%s" % \
+        cmd = "npm pack %s@%s" % \
             (pkg, version)
         print "Start: %s" % (cmd)
         try:
             with open("stdout.txt", "wb") as out, open("stderr.txt", "wb") as err:
-                proc = subprocess.Popen(cmd, stdout=out, stderr=err, shell=True)
+                proc = subprocess.Popen(cmd, cwd=cachedir, stdout=out, stderr=err, shell=True)
             streamdata = proc.communicate()[0]
             if proc.returncode != 0:
                 print "ERROR: Failed to %s" % (cmd)
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         with open(ARGS.packages, 'r') as packages:
             for package in packages:
                 package = str(package).strip()
-                get_package(package, get_versions(package))
+                get_package(package, get_versions(package), os.path.abspath(ARGS.cachedir))
     except Exception as ex:
         print ex.message
         exit(1)
