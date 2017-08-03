@@ -1,9 +1,8 @@
 """
 Author: Keith Robertson
 Summary:
- Given a directory and a registry, this program will upload all of the NPM .tgz files to the
- registry. Important: You need to make sure your $HOME/.npmrc contains credentials for the
- given registry.
+ Given a directory, this program will upload all of the NPM .tgz files to the
+ registry in your $HOME/.npmrc.
 """
 
 import argparse
@@ -29,13 +28,13 @@ def find_packages(path):
     return retval
 
 
-def publish_package(pkg, registry):
+def publish_package(pkg):
     """
         Kwargs:
             package: The npm package to publish.
             registry: The registry to publish to.
     """
-    cmd = "npm publish --always-auth=true --registry=%s %s" % (registry, pkg)
+    cmd = "npm publish --always-auth=true --verbose %s" % (pkg)
     print "Start: %s" % (cmd)
 
     with open("stdout.txt", "wb") as out, open("stderr.txt", "wb") as err:
@@ -57,14 +56,12 @@ if __name__ == '__main__':
         your $HOME/.npmrc contains credentials for the given registry.
 
         Example:
-            npmCacheUpload.py ~/.npm/ https://<account>.visualstudio.com/_packaging/<feed>/npm/registry
-            npmCacheUpload.py $env:APPDATA\\npm-cache https://<account>.visualstudio.com/_packaging/<feed>/npm/registry
+            npmbulkpublish ~/.npm/
+            npmbulkpublish $env:APPDATA\\npm-cache
          '''))
     PARSER.add_argument('cachedir',
                         help='Directory containing all of the node modules in .tgz format \
                         you wish to publish.')
-    PARSER.add_argument('registry',
-                        help='Registry to which you want to publish the node modules.')
 
     ARGS = PARSER.parse_args()
 
@@ -75,4 +72,4 @@ if __name__ == '__main__':
         exit(1)
 
     for package in PACKAGES:
-        publish_package(package, ARGS.registry)
+        publish_package(package)
