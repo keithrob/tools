@@ -1,7 +1,7 @@
 """
 Author: Keith Robertson
 Summary:
- Download a bunch of random packages from the public npm registry and their associated
+ Download a bunch of random packages from any registry and their associated
  versions into a temporary directory as specified by cachedir.
 """
 
